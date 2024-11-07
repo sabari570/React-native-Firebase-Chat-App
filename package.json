@@ -17,7 +17,7 @@
   "dependencies": {
     "@expo/vector-icons": "^14.0.4",
     "@lottiefiles/dotlottie-react": "^0.6.5",
-    "@react-native-async-storage/async-storage": "^1.24.0",
+    "@react-native-async-storage/async-storage": "1.23.1",
     "@react-navigation/native": "^6.0.2",
     "expo": "~51.0.28",
     "expo-constants": "~16.0.2",
@@ -29,7 +29,8 @@
     "expo-system-ui": "~3.0.7",
     "expo-web-browser": "~13.0.3",
     "firebase": "^11.0.1",
-    "lottie-react-native": "^7.1.0",
+    "firebase_chat_app": "file:",
+    "lottie-react-native": "6.7.0",
     "nativewind": "^4.1.23",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -41,7 +42,8 @@
     "react-native-screens": "3.31.1",
     "react-native-toast-message": "^2.2.1",
     "react-native-web": "~0.19.10",
-    "tailwindcss": "^3.4.14"
+    "tailwindcss": "^3.4.14",
+    "expo-image": "~1.13.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

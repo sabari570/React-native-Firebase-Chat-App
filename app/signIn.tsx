@@ -8,12 +8,14 @@ import TextFieldComponent from '@/components/TextFieldComponent';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import LoadingComponent from '@/components/LoadingComponent';
+import { useAuth } from '../context/authContext';
 
 const SignIn = () => {
   const router = useRouter();
   const emailRef = useRef("");
   const passwordRef = useRef("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { login } = useAuth();
 
   const handleLogin = async () => {
     if (!emailRef.current || !passwordRef.current) {
@@ -23,6 +25,22 @@ const SignIn = () => {
         text2: "Please enter both email and password"
       })
     }
+    setIsLoading(true);
+    const response = await login(emailRef.current, passwordRef.current);
+    if (response.success) {
+      Toast.show({
+        type: "success",
+        text1: 'Success',
+        text2: "User signed in successfully"
+      })
+    } else {
+      Toast.show({
+        type: "error",
+        text1: 'Failed',
+        text2: response?.msg
+      })
+    }
+    setIsLoading(false);
   }
 
   return (

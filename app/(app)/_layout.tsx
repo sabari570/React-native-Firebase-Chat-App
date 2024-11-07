@@ -1,9 +1,17 @@
 import React from 'react'
 import { Slot, Stack } from 'expo-router'
+import HomeHeader from '../../components/HomeHeader'
 
 const _layout = () => {
     return (
-        <Stack />
+        <Stack>
+            <Stack.Screen
+                name='home'
+                options={{
+                    header: () => <HomeHeader />
+                }}
+            />
+        </Stack>
     )
 }
 

@@ -1,25 +1,33 @@
 import { auth, db } from "@/services/firebaseConfig";
-import { createUserWithEmailAndPassword, onAuthStateChanged, User } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { createContext, type PropsWithChildren, useContext, useEffect, useState } from "react";
+import { handleAuthErrors } from "../constants/handleErrors";
+import { CHAT_APP_CONSTANTS } from "../constants/constants";
+
+interface AuthResponse {
+    success: boolean;
+    data?: any;
+    msg?: any;
+}
 
 export const AuthContext = createContext<{
     user: any | null;
     isAuthenticated: boolean | undefined;
-    login: (email: string, password: string) => void;
-    register: (email: string, password: string, username: string, profileUrl: string) => void;
-    logout: () => void;
+    login: (email: string, password: string) => Promise<AuthResponse>;
+    register: (email: string, password: string, username: string, profileUrl: string) => Promise<AuthResponse>;
+    logout: () => Promise<AuthResponse>;
 }>({
     user: null,
     isAuthenticated: undefined,
-    login: () => null,
-    register: () => null,
-    logout: () => null,
+    login: () => Promise.resolve({ success: false }),
+    register: () => Promise.resolve({ success: false }),
+    logout: () => Promise.resolve({ success: false }),
 });
 
 
 export function AuthContextProvider({ children }: PropsWithChildren) {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<any>(null);
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | undefined>(undefined);
 
     useEffect(() => {
@@ -29,6 +37,7 @@ export function AuthContextProvider({ children }: PropsWithChildren) {
             if (user) {
                 setIsAuthenticated(true);
                 setUser(user);
+                updateUserData(user.uid)
             } else {
                 setIsAuthenticated(false);
                 setUser(null);
@@ -38,19 +47,40 @@ export function AuthContextProvider({ children }: PropsWithChildren) {
         return unSub;
     }, [onAuthStateChanged]);
 
-    const login = async (email: string, password: string) => {
-        try {
+    const updateUserData = async (userId: string) => {
+        const docRef = doc(db, CHAT_APP_CONSTANTS.USERS_COLLLECTION, userId);
+        const documentSnapshot = await getDoc(docRef);
 
-        } catch (error) {
-            console.log("Error while login: ", error)
+        if (documentSnapshot.exists()) {
+            let userData = documentSnapshot.data();
+            setUser({
+                ...user,
+                username: userData.username,
+                email: userData.email,
+                profileUrl: userData.profileUrl,
+                userId,
+            })
+        }
+    }
+
+    const login = async (email: string, password: string): Promise<AuthResponse> => {
+        try {
+            const response = await signInWithEmailAndPassword(auth, email, password);
+            console.log("Response after login: ", response);
+            return { success: true, data: response }
+        } catch (error: any) {
+            console.log("Error while login: ", error);
+            return { success: false, msg: handleAuthErrors(error.code) }
         }
     }
 
     const logout = async () => {
         try {
-
-        } catch (error) {
-            console.log("Error while logout: ", error)
+            await signOut(auth);
+            return { success: true }
+        } catch (error: any) {
+            console.log("Error while logout: ", error.code);
+            return { success: false, msg: error.code }
         }
     }
 
@@ -61,13 +91,13 @@ export function AuthContextProvider({ children }: PropsWithChildren) {
 
             // in setDoc we manually give the documentID
             // in addDoc the documentId is automatically generated
-            await setDoc(doc(db, 'users', response?.user?.uid), {
-                username, profileUrl, userId: response?.user?.uid
+            await setDoc(doc(db, CHAT_APP_CONSTANTS.USERS_COLLLECTION, response?.user?.uid), {
+                username, email, profileUrl, userId: response?.user?.uid
             });
             return { success: true, data: response?.user };
-        } catch (error) {
+        } catch (error: any) {
             console.log("Error while register: ", error);
-            return { success: false, msg: error }
+            return { success: false, msg: handleAuthErrors(error.code) }
         }
     };
 

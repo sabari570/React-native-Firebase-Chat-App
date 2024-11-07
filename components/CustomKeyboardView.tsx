@@ -1,6 +1,6 @@
 import { View, Text, KeyboardAvoidingView, Platform } from 'react-native'
 import React, { PropsWithChildren } from 'react'
-import { ScrollView } from 'react-native-gesture-handler'
+import { ScrollView } from 'react-native'
 
 // Inorder to check whether the platform is android/ios
 const ios = Platform.OS === 'ios';

@@ -35,11 +35,24 @@ const SignUp = () => {
     let response = await register(emailRef.current, passwordRef.current, usernameRef.current, profileRef.current);
     setIsLoading(false);
     console.log("Response: ", response);
+    if (response.success) {
+      Toast.show({
+        type: "success",
+        text1: 'Success',
+        text2: "User registered successfully"
+      })
+    } else {
+      Toast.show({
+        type: "error",
+        text1: 'Failed',
+        text2: response?.msg
+      })
+    }
   }
 
   return (
     <CustomKeyboardView>
-      <View className='flex-1 justify-center items-center pt-5 gap-5'>
+      <View className=' mt-[20%] flex-1 justify-center items-center pt-5 pb-5 gap-5'>
         <StatusBar style='dark' />
         <View
           className='h-25 w-full items-center'>
