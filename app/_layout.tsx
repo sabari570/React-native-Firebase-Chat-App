@@ -1,37 +1,70 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { Slot, Stack, useRouter, useSegments } from "expo-router";
+import "../global.css";
+import { View } from "react-native";
+import { AuthContextProvider, useAuth } from "@/context/authContext";
+import { useEffect } from "react";
+import Toast from "react-native-toast-message";
 
-import { useColorScheme } from '@/hooks/useColorScheme';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+/** 
+ * Folder structure:
+ * app
+ *  _layout.tsx
+ *  index.tsx
+ *  signIn.tsx
+ *  signUp.tsx
+ *  (app) -> protected routes, files written under this are protected
+ *    _layout.tsx
+ *    home.tsx
+ * 
+*/
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+
+const MainLayout = () => {
+  const { isAuthenticated } = useAuth();
+
+  // This hook will return us an array of all the segments in current route
+  /** 
+  app/
+  home/
+    index.tsx
+  profile/
+    [userId].tsx
+
+    And you navigate to /profile/123, the useSegments hook will return an array like:
+    ['profile', '123']
+   * 
+  */
+  const segments = useSegments();
+  const router = useRouter();
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
+    // Check if the user is authenticated or not
+    if (typeof isAuthenticated === 'undefined') return;
+
+    // if inApp is true it means we are inside the protected route i.e inside (app)
+    const inApp = segments[0] === '(app)';
+
+    // if the user isAuthenticated and not insideApp(inApp) then redirect the user to homepage
+    if (isAuthenticated && !inApp) {
+      // redirect to home page
+      router.replace('/home');
+    } else if (!isAuthenticated) {
+      // redirect to signin page
+      router.replace('/signIn');
     }
-  }, [loaded]);
+  }, [isAuthenticated])
 
-  if (!loaded) {
-    return null;
-  }
+  return <Slot />
+}
 
+
+export default function RootLayout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-    </ThemeProvider>
+    <AuthContextProvider>
+      {/* Since we need to access the useAuth hook inside the provider */}
+      <MainLayout />
+      <Toast />
+    </AuthContextProvider>
   );
 }
