@@ -65,7 +65,7 @@ const SignUp = () => {
             source={require("../assets/images/register.png")} />
         </View>
 
-        <View className='w-full px-4 gap-4 md:w-[50%] lg:w-[25%]'>
+        <View className='w-full px-4 gap-4 md:w-[50%] lg:w-[40%]'>
           <Text className='font-bold tracking-wider text-center text-3xl text-neutral-800'>
             Sign Up
           </Text>

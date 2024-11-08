@@ -43,7 +43,7 @@ export function AuthContextProvider({ children }: PropsWithChildren) {
                 setUser(null);
             }
         });
-
+        console.log("IsAuthenticated: ", isAuthenticated)
         return unSub;
     }, [onAuthStateChanged]);
 

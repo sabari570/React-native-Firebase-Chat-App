@@ -1,6 +1,5 @@
-import { View } from 'react-native'
+import { ActivityIndicator, View } from 'react-native'
 import React from 'react'
-import LottieView from 'lottie-react-native'
 
 interface LoadingComponetProps {
     size: number,
@@ -9,14 +8,9 @@ interface LoadingComponetProps {
 const LoadingComponent: React.FC<LoadingComponetProps> = ({ size }) => {
     return (
         <View style={{
-            height: size,
-            aspectRatio: 1,
+            alignItems: 'center'
         }}>
-            <LottieView
-                style={{ flex: 1, }}
-                source={require("../assets/images/loading.json")}
-                autoPlay loop
-            />
+            <ActivityIndicator color="indigo" size={size} />
         </View>
     )
 }

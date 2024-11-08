@@ -2,14 +2,11 @@ import { View, Text, KeyboardAvoidingView, Platform } from 'react-native'
 import React, { PropsWithChildren } from 'react'
 import { ScrollView } from 'react-native'
 
-// Inorder to check whether the platform is android/ios
-const ios = Platform.OS === 'ios';
-
 // This component is created inorder to avoid the keyboard covering up the input fields
 const CustomKeyboardView = ({ children }: PropsWithChildren) => {
   return (
     <KeyboardAvoidingView
-      behavior={ios ? 'padding' : 'height'}
+      behavior={'height'}
       style={{ flex: 1 }}
     >
       <ScrollView

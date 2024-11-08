@@ -7,11 +7,11 @@ import { initializeApp } from "firebase/app";
 import {
   initializeAuth,
   getReactNativePersistence,
-  getAuth,
-  setPersistence,
+  indexedDBLocalPersistence,
 } from "firebase/auth";
 import { getFirestore, collection } from "firebase/firestore";
 import { CHAT_APP_CONSTANTS } from "../constants/constants";
+
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -27,7 +27,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Firebase auth instance setup (For Android)
-export const auth = initializeAuth(app, {
+export const auth = initializeAuth(app, CHAT_APP_CONSTANTS.isWeb ? {
+  persistence: indexedDBLocalPersistence,
+} : {
   // we need to make some changes in the tsconfig.json file inorder to access the "getReactNativePersistence()",
   // Also need to install another package("AsyncStorage") for persisting the user in react native async storage
   // AsyncStorage -> is responsible for storing the user data in local storage
