@@ -1,31 +1,51 @@
-import { View, Text, Button } from 'react-native'
-import React from 'react'
-import { useAuth } from '../../context/authContext'
-import Toast from 'react-native-toast-message';
+import { Text, View, } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { StatusBar } from 'expo-status-bar';
+import LoadingComponent from '@/components/LoadingComponent';
+import ChatList from '@/components/ChatList';
+import { useAuth } from '@/context/authContext';
+import { DocumentData, getDocs, query, QueryDocumentSnapshot, where } from 'firebase/firestore';
+import { usersCollectionRef } from '@/services/firebaseConfig';
+import { User } from 'firebase/auth';
+import { UserInterface } from '@/constants/constants';
 
 const Home = () => {
-    const { logout, user } = useAuth();
+    const [users, setUsers] = useState<UserInterface[]>([]);
+    const { user } = useAuth();
 
-    const handleLogout = async () => {
-        const response = await logout();
-        console.log("response after logout: ", response)
-        if (response.success) {
-            Toast.show({
-                type: "success",
-                text1: 'Successfully',
-                text2: "Logged out successfully"
-            })
-        } else {
-            Toast.show({
-                type: "error",
-                text1: 'Failed',
-                text2: response?.msg
-            })
-        }
+    const getUsers = async () => {
+        // Fetch users from firebase
+        const q = query(usersCollectionRef, where('userId', '!=', user?.uid));
+        const querySnapShot = await getDocs(q);
+        const data: UserInterface[] = querySnapShot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
+            userId: doc.data().userId,
+            username: doc.data().username,
+            profileUrl: doc.data().profileUrl,
+            email: doc.data().email,
+        }));
+        setUsers(data)
     }
+
+    useEffect(() => {
+        if (user?.uid) {
+            getUsers();
+        }
+    }, [user]);
+
     return (
         <View className='flex-1 bg-white'>
-        </View>
+            <StatusBar style='light' />
+
+            {
+                users.length > 0 ? (
+                    <ChatList users={users} />
+                ) : (
+                    <View className='flex-1 items-center justify-center'>
+                        <LoadingComponent size={30} />
+                    </View>
+                )
+            }
+        </View >
     )
 }
 

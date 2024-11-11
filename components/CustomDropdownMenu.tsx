@@ -1,38 +1,8 @@
-import { View, Text, TouchableOpacity, Animated, Pressable } from 'react-native'
-import React, { useEffect, useRef } from 'react'
+import { View, Text, Pressable } from 'react-native'
+import React from 'react'
 import { FlatList } from 'react-native-gesture-handler'
 
 const CustomDropdownMenu: React.FC<CustomDropdpownProps> = ({ options, onSelect, isOpen }) => {
-    const opacityAnim = useRef(new Animated.Value(0)).current;
-    const translateYAnim = useRef(new Animated.Value(-10)).current;
-
-    useEffect(() => {
-        if (isOpen) {
-            Animated.timing(opacityAnim, {
-                toValue: 1,
-                duration: 300,
-                useNativeDriver: true,
-            }).start();
-
-            Animated.timing(translateYAnim, {
-                toValue: 0,
-                duration: 300,
-                useNativeDriver: true,
-            }).start();
-        } else {
-            Animated.timing(opacityAnim, {
-                toValue: 0,
-                duration: 300,
-                useNativeDriver: true,
-            }).start();
-
-            Animated.timing(translateYAnim, {
-                toValue: -10,
-                duration: 300,
-                useNativeDriver: true,
-            }).start();
-        }
-    }, [isOpen]);
 
     return (
         <View className='relative'>

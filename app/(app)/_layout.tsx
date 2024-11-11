@@ -1,6 +1,7 @@
 import React from 'react'
-import { Slot, Stack } from 'expo-router'
+import { Stack } from 'expo-router'
 import HomeHeader from '../../components/HomeHeader'
+import ChatRoomHeader from '@/components/ChatRoomHeader'
 
 const _layout = () => {
     return (
@@ -9,6 +10,15 @@ const _layout = () => {
                 name='home'
                 options={{
                     header: () => <HomeHeader />
+                }}
+            />
+
+            <Stack.Screen
+                name='chatRoom'
+                options={{
+                    title: '',
+                    headerShadowVisible: false,
+                    headerShown: false,
                 }}
             />
         </Stack>

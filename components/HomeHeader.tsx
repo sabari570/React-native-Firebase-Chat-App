@@ -8,10 +8,11 @@ import { heightPercentageToDP } from 'react-native-responsive-screen';
 import CustomDropdownMenu from './CustomDropdownMenu';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import Toast from 'react-native-toast-message';
 
 const HomeHeader = () => {
     const { top } = useSafeAreaInsets();
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
     const dropdownRef = useRef(null);
 
@@ -35,8 +36,25 @@ const HomeHeader = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [])
 
-    const handleSelect = () => {
-        closeDropdown();
+    const handleSelect = async ({ label }: { label: string }) => {
+        if (label === 'Logout') {
+            const response = await logout();
+            if (response.success) {
+                Toast.show({
+                    type: "success",
+                    text1: 'Sucess',
+                    text2: "Logged out successfully"
+                })
+            } else {
+                Toast.show({
+                    type: "error",
+                    text1: 'Failed',
+                    text2: response?.msg
+                })
+            }
+        } else {
+            // TODO: Go to profile page
+        }
     }
 
     return (
