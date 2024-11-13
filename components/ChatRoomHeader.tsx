@@ -33,8 +33,8 @@ const ChatRoomHeader: React.FC<ChatRoomHeaderProps> = ({ item, router }) => {
             </View>
 
             <View className='m-3 flex-row gap-5'>
-                <Ionicons name="call" size={24} color="#737373" />
-                <Ionicons name="videocam" size={24} color="#737373" />
+                <Ionicons className='cursor-pointer' name="call" size={24} color="#737373" />
+                <Ionicons className='cursor-pointer' name="videocam" size={24} color="#737373" />
             </View>
         </View >
     )

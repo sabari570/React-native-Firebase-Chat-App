@@ -6,8 +6,8 @@ import ChatList from '@/components/ChatList';
 import { useAuth } from '@/context/authContext';
 import { DocumentData, getDocs, query, QueryDocumentSnapshot, where } from 'firebase/firestore';
 import { usersCollectionRef } from '@/services/firebaseConfig';
-import { User } from 'firebase/auth';
 import { UserInterface } from '@/constants/constants';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Home = () => {
     const [users, setUsers] = useState<UserInterface[]>([]);
@@ -26,11 +26,15 @@ const Home = () => {
         setUsers(data)
     }
 
-    useEffect(() => {
-        if (user?.uid) {
-            getUsers();
-        }
-    }, [user]);
+    // This will get executed when we arrive back to this screen, which means the code
+    // gets executed when the screen becomes active
+    useFocusEffect(
+        React.useCallback(() => {
+            if (user?.uid) {
+                getUsers();
+            }
+        }, [user])
+    );
 
     return (
         <View className='flex-1 bg-white'>

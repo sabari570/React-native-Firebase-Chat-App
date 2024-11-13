@@ -9,7 +9,7 @@ import {
   getReactNativePersistence,
   indexedDBLocalPersistence,
 } from "firebase/auth";
-import { getFirestore, collection } from "firebase/firestore";
+import { getFirestore, collection, DocumentReference } from "firebase/firestore";
 import { CHAT_APP_CONSTANTS } from "../constants/constants";
 
 
@@ -47,4 +47,8 @@ export const usersCollectionRef = collection(
 export const roomsCollectionRef = collection(
   db,
   CHAT_APP_CONSTANTS.ROOMS_COLLECTION
+);
+export const messagesCollectionRef = (docRef: DocumentReference) => collection(
+  docRef,
+  CHAT_APP_CONSTANTS.MESSAGE_COLLECTION
 );
