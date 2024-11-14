@@ -1,14 +1,31 @@
 import { View, Text, TouchableOpacity } from 'react-native'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Router, Stack, } from 'expo-router';
 import { CHAT_APP_CONSTANTS, USER_STATUS, UserInterface } from '@/constants/constants';
 import Entypo from '@expo/vector-icons/Entypo';
 import { Image } from 'expo-image';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../services/firebaseConfig';
 
 const ChatRoomHeader: React.FC<ChatRoomHeaderProps> = ({ item, router }) => {
-    const userOnlineStatus: boolean = item?.status === USER_STATUS.ONLINE;
+    const [userOnlineStatus, setUserOnlineStatus] = useState<boolean>(item?.status === USER_STATUS.ONLINE);
+
+    useEffect(() => {
+        const unsubscribe = onSnapshot(
+            doc(db, CHAT_APP_CONSTANTS.USERS_COLLLECTION, item?.uid),
+            (snapshot) => {
+                if (snapshot.exists()) {
+                    const userData = snapshot.data();
+                    setUserOnlineStatus(userData.status === USER_STATUS.ONLINE);
+                }
+            },
+            (error) => console.error("Error listening to the user status change: ", error)
+        )
+
+        return () => unsubscribe();
+    }, [item?.uid])
     return (
         <View className='flex-row items-center justify-between'>
             <View className='my-2 mx-3 flex-row items-center gap-3'>

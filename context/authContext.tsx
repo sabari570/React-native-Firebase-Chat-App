@@ -36,15 +36,14 @@ export function AuthContextProvider({ children }: PropsWithChildren) {
         const unSub = onAuthStateChanged(auth, (user) => {
             if (user) {
                 setIsAuthenticated(true);
-                console.log("USer authenticated: ", user);
                 setUser(user);
-                updateUserData(user.uid)
+                updateUserData(user.uid);
+                localStorage.setItem("userId", user?.uid);
             } else {
                 setIsAuthenticated(false);
                 setUser(null);
             }
         });
-        console.log("IsAuthenticated: ", isAuthenticated)
         return unSub;
     }, [onAuthStateChanged]);
 
@@ -67,7 +66,6 @@ export function AuthContextProvider({ children }: PropsWithChildren) {
     const login = async (email: string, password: string): Promise<AuthResponse> => {
         try {
             const response = await signInWithEmailAndPassword(auth, email, password);
-            console.log("Response after login: ", response);
             return { success: true, data: response }
         } catch (error: any) {
             console.log("Error while login: ", error);
@@ -78,6 +76,7 @@ export function AuthContextProvider({ children }: PropsWithChildren) {
     const logout = async () => {
         try {
             await signOut(auth);
+            localStorage.setItem("userId", "");
             return { success: true }
         } catch (error: any) {
             console.log("Error while logout: ", error.code);
@@ -88,7 +87,6 @@ export function AuthContextProvider({ children }: PropsWithChildren) {
     const register = async (email: string, password: string, username: string, profileUrl: string) => {
         try {
             const response = await createUserWithEmailAndPassword(auth, email, password);
-            console.log("User after registering: ", response?.user);
 
             // in setDoc we manually give the documentID
             // in addDoc the documentId is automatically generated

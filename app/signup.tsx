@@ -34,7 +34,6 @@ const SignUp = () => {
     setIsLoading(true);
     let response = await register(emailRef.current, passwordRef.current, usernameRef.current, profileRef.current);
     setIsLoading(false);
-    console.log("Response: ", response);
     if (response.success) {
       Toast.show({
         type: "success",

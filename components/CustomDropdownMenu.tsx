@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from 'react-native'
 import React from 'react'
-import { FlatList } from 'react-native-gesture-handler'
+import { FlatList } from 'react-native'
 
 const CustomDropdownMenu: React.FC<CustomDropdpownProps> = ({ options, onSelect, isOpen }) => {
 

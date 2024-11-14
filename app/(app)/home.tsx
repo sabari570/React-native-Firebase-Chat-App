@@ -12,7 +12,6 @@ import { useFocusEffect } from '@react-navigation/native';
 const Home = () => {
     const [users, setUsers] = useState<UserInterface[]>([]);
     const { user } = useAuth();
-    const [userId, setUserId] = useState<string>('');
 
     const getUsers = async () => {
         // Fetch users from firebase
@@ -29,10 +28,10 @@ const Home = () => {
     }
 
 
-    const setUserOnline = async () => {
-        if (user) {
+    const setUserOnline = async (userId?: string | null) => {
+        if (userId != null) {
             try {
-                const userRef = doc(db, CHAT_APP_CONSTANTS.USERS_COLLLECTION, (user?.uid));
+                const userRef = doc(db, CHAT_APP_CONSTANTS.USERS_COLLLECTION, (userId));
                 await updateDoc(userRef, {
                     status: USER_STATUS.ONLINE,
                     lastSeen: Timestamp.now(),
@@ -43,15 +42,17 @@ const Home = () => {
         }
     };
 
-    const setUserOffline = async () => {
-        try {
-            const userRef = doc(db, CHAT_APP_CONSTANTS.USERS_COLLLECTION, (user?.uid));
-            await updateDoc(userRef, {
-                status: USER_STATUS.OFFLINE,
-                lastSeen: Timestamp.now(),
-            });
-        } catch (error) {
-            console.error('Error setting user status offline: ', error);
+    const setUserOffline = async (userId?: string | null) => {
+        if (userId != null) {
+            try {
+                const userRef = doc(db, CHAT_APP_CONSTANTS.USERS_COLLLECTION, (userId));
+                await updateDoc(userRef, {
+                    status: USER_STATUS.OFFLINE,
+                    lastSeen: Timestamp.now(),
+                });
+            } catch (error) {
+                console.error('Error setting user status offline: ', error);
+            }
         }
     };
 
@@ -59,8 +60,9 @@ const Home = () => {
     // gets executed when the screen becomes active
     useFocusEffect(
         React.useCallback(() => {
+            const userId = localStorage.getItem("userId")
             if (user?.uid) {
-                setUserOnline();
+                setUserOnline(userId)
                 getUsers();
             }
         }, [user])
@@ -70,10 +72,11 @@ const Home = () => {
     // Listen for app state changes to handle background/foreground transitions
     useEffect(() => {
         const handleAppStateChange = (nextAppState: AppStateStatus) => {
+            const userId = localStorage.getItem("userId");
             if (nextAppState === 'background' || nextAppState === 'inactive') {
-                setUserOffline();
+                setUserOffline(userId);
             } else if (nextAppState === 'active') {
-                setUserOnline();
+                setUserOnline(userId);
             }
         }
 
@@ -88,19 +91,20 @@ const Home = () => {
     // Handle tab visibility change in web
     useEffect(() => {
         const handleVisibilityChange = () => {
-            console.log("EXecuted!!!!", document.visibilityState);
-            if (document.visibilityState === 'hidden') {
-                setUserOffline();
-            } else if (document.visibilityState === 'visible') {
-                setUserOnline();
-            }
-        };
+            if (typeof document !== "undefined") {
+                if (document.visibilityState === 'hidden') {
+                    setUserOffline();
+                } else if (document.visibilityState === 'visible') {
+                    setUserOnline();
+                }
+            };
 
-        document.addEventListener('visibilitychange', handleVisibilityChange);
+            document.addEventListener('visibilitychange', handleVisibilityChange);
 
-        return () => {
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-        };
+            return () => {
+                document.removeEventListener('visibilitychange', handleVisibilityChange);
+            };
+        }
     }, []);
 
     return (

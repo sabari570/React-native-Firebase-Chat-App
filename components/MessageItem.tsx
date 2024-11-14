@@ -1,11 +1,11 @@
 import { View, Text, Dimensions } from 'react-native'
 import React from 'react'
 import { Image } from 'expo-image'
-import { heightPercentageToDP, widthPercentageToDP } from 'react-native-responsive-screen'
+import { heightPercentageToDP } from 'react-native-responsive-screen'
 import { CHAT_APP_CONSTANTS } from '@/constants/constants'
 
 
-const CustomMessageRenderer = (isMe: boolean, messageText?: string, profilePicUrl?: string) => {
+const CustomMessageRenderer = (isMe: boolean, messageText?: string, profilePicUrl?: string, messageIsSeen?: boolean) => {
     const screenWidth = Dimensions.get('window').width;
     return (
         <View className={`flex-row ${isMe ? "justify-end mr-2" : "justify-start ml-2"}`}>
@@ -34,6 +34,9 @@ const CustomMessageRenderer = (isMe: boolean, messageText?: string, profilePicUr
                         >
                             <Text className={`font-sans text-sm ${isMe ? "text-white" : "text-gray-800"}`}>
                                 {messageText}
+                                {isMe && (
+                                    <Text>{messageIsSeen ? 'Seen' : 'Delivered'}</Text>
+                                )}
                             </Text>
                         </View>
                     </View>
@@ -45,7 +48,7 @@ const CustomMessageRenderer = (isMe: boolean, messageText?: string, profilePicUr
 
 const MessageItem: React.FC<MessageItemProps> = ({ message, currrentUser }) => {
     const isMe: boolean = currrentUser?.uid == message?.userId;
-    return CustomMessageRenderer(isMe, message?.text, message?.profileUrl);
+    return CustomMessageRenderer(isMe, message?.text, message?.profileUrl, message?.seen);
 
 }
 

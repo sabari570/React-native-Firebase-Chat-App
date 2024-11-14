@@ -1,16 +1,15 @@
 import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { CHAT_APP_CONSTANTS, UserInterface } from '@/constants/constants';
 import { StatusBar } from 'expo-status-bar';
 import ChatRoomHeader from '@/components/ChatRoomHeader';
 import MessageList from '@/components/MessageList';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
 import Feather from '@expo/vector-icons/Feather';
-import { AutoGrowTextInput } from 'react-native-auto-grow-textinput';
 import CustomKeyboardView from '@/components/CustomKeyboardView';
 import { useAuth } from '@/context/authContext';
-import { addDoc, collection, doc, DocumentData, getDoc, onSnapshot, orderBy, query, setDoc, Timestamp } from 'firebase/firestore';
+import { addDoc, CollectionReference, doc, DocumentData, getDoc, onSnapshot, orderBy, query, setDoc, Timestamp, updateDoc } from 'firebase/firestore';
 import { db, messagesCollectionRef } from '@/services/firebaseConfig';
 import Toast from 'react-native-toast-message';
 import LoadingComponent from '@/components/LoadingComponent';
@@ -28,7 +27,28 @@ const ChatRoom = () => {
     const minHeight = 50;
     const maxHeight = 200;
     const scrollViewRef = useRef<ScrollView>(null);
-    console.log("USer in chat room: ", user)
+    const [isChatRoomOpen, setIsChatRoomOpen] = useState(false);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            // Mark chat room as open when the screen is focused
+            setIsChatRoomOpen(true);
+
+            return () => {
+                // Mark chat room as closed when the screen is unfocused
+                setIsChatRoomOpen(false);
+            };
+        }, [])
+    );
+
+    const markMessageAsSeen = async (messageRef: CollectionReference, messageId: string) => {
+        console.log("Is this getting called!!")
+        try {
+            await setDoc(doc(messageRef, messageId), { seen: true }, { merge: true });
+        } catch (error) {
+            console.log("Error while setting message as seen: ", error);
+        }
+    }
 
     // This LOGIC works only for web
     // This is the Logic for resizing the textInput component
@@ -56,7 +76,15 @@ const ChatRoom = () => {
             // The onSnapShot is the listener it listens to the messageCollectionRef
             const unsub = onSnapshot(q, (snapshot) => {
                 let allMessages = snapshot.docs.map((message) => {
-                    return message.data();
+                    const messageData = message.data();
+                    const userId = localStorage.getItem("userId");
+                    console.log("My userId: ", userId);
+                    console.log({ messageText: messageData.text, seenValue: !messageData.seen, mainValue: messageData.receiverId == userId });
+                    if (isChatRoomOpen && messageData.receiverId == userId) {
+                        console.log("Message data: ", message)
+                        markMessageAsSeen(messagesRef, message?.id);
+                    }
+                    return messageData;
                 });
                 setMessages([...allMessages]);
             });
@@ -77,12 +105,14 @@ const ChatRoom = () => {
             let roomId = CHAT_APP_CONSTANTS.getRoomId(user?.uid, item?.uid);
             const docRef = doc(db, CHAT_APP_CONSTANTS.ROOMS_COLLECTION, roomId);
             const messageRef = messagesCollectionRef(docRef);
-            const messageDoc = await addDoc(messageRef, {
+            await addDoc(messageRef, {
                 userId: user?.uid,
                 text: message,
                 profileUrl: user?.profileUrl,
                 senderName: user?.username,
-                createdAt: Timestamp.fromDate(new Date())
+                createdAt: Timestamp.fromDate(new Date()),
+                seen: false,
+                receiverId: item?.uid,
             });
         } catch (error) {
             console.log("Error while sending message: ", error)
@@ -101,9 +131,6 @@ const ChatRoom = () => {
             scrollViewRef.current.scrollToEnd({ animated: true });
         }
     }, [messages])
-
-    console.log("other person: ", item?.uid);
-    console.log("Me: ", user?.uid);
 
     return (
         <CustomKeyboardView inChat={true}>

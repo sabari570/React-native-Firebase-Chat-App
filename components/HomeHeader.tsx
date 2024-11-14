@@ -25,15 +25,16 @@ const HomeHeader = () => {
     ];
 
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            console.log("Clicked!!");
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                closeDropdown();
+        if (typeof document !== "undefined") {
+            const handleClickOutside = (event: MouseEvent) => {
+                if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                    closeDropdown();
+                }
             }
-        }
-        document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener('mousedown', handleClickOutside);
 
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+            return () => document.removeEventListener('mousedown', handleClickOutside);
+        }
     }, [])
 
     const handleSelect = async ({ label }: { label: string }) => {
