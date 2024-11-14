@@ -14,9 +14,15 @@ export const CHAT_APP_CONSTANTS = {
   }
 };
 
+export enum USER_STATUS {
+  ONLINE = 'online',
+  OFFLINE = 'offline'
+}
+
 export interface UserInterface {
-  userId: string,
+  uid: string,
   username: string,
   profileUrl: string,
   email: string,
+  status: string,
 }

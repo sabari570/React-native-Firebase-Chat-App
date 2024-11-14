@@ -36,6 +36,7 @@ export function AuthContextProvider({ children }: PropsWithChildren) {
         const unSub = onAuthStateChanged(auth, (user) => {
             if (user) {
                 setIsAuthenticated(true);
+                console.log("USer authenticated: ", user);
                 setUser(user);
                 updateUserData(user.uid)
             } else {
@@ -58,7 +59,7 @@ export function AuthContextProvider({ children }: PropsWithChildren) {
                 username: userData.username,
                 email: userData.email,
                 profileUrl: userData.profileUrl,
-                userId,
+                uid: userId,
             })
         }
     }

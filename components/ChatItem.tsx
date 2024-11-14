@@ -16,6 +16,8 @@ const ChatItem: React.FC<ChatItemProps> = ({ item, index, noBorder, router }) =>
         })
     }
 
+    console.log("user item obtained: ", item)
+
     return (
         <TouchableOpacity onPress={openChatRoom} className={`flex-row justify-between mx-4 items-center gap-3 mb-4 pb-4 ${noBorder ? '' : 'border-b'} border-b-neutral-200`}>
             <Image
