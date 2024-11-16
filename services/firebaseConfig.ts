@@ -12,15 +12,13 @@ import {
 import { getFirestore, collection, DocumentReference } from "firebase/firestore";
 import { CHAT_APP_CONSTANTS } from "../constants/constants";
 
-
-// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDGe2hXvwF8VOaOLwWRBZKfYHWWgzUMq0Q",
-  authDomain: "pet-adopt-ed05f.firebaseapp.com",
-  projectId: "pet-adopt-ed05f",
-  storageBucket: "pet-adopt-ed05f.appspot.com",
-  messagingSenderId: "460568904053",
-  appId: "1:460568904053:web:1e6358010528651720133c",
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase

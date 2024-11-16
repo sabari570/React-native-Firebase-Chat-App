@@ -13,6 +13,7 @@ import { addDoc, CollectionReference, doc, DocumentData, getDoc, onSnapshot, ord
 import { db, messagesCollectionRef } from '@/services/firebaseConfig';
 import Toast from 'react-native-toast-message';
 import LoadingComponent from '@/components/LoadingComponent';
+import { useIsFocused } from '@react-navigation/native';
 
 const ChatRoom = () => {
     // Inorder to fetch the params that are passed from one route to another
@@ -27,28 +28,6 @@ const ChatRoom = () => {
     const minHeight = 50;
     const maxHeight = 200;
     const scrollViewRef = useRef<ScrollView>(null);
-    const [isChatRoomOpen, setIsChatRoomOpen] = useState(false);
-
-    useFocusEffect(
-        React.useCallback(() => {
-            // Mark chat room as open when the screen is focused
-            setIsChatRoomOpen(true);
-
-            return () => {
-                // Mark chat room as closed when the screen is unfocused
-                setIsChatRoomOpen(false);
-            };
-        }, [])
-    );
-
-    const markMessageAsSeen = async (messageRef: CollectionReference, messageId: string) => {
-        console.log("Is this getting called!!")
-        try {
-            await setDoc(doc(messageRef, messageId), { seen: true }, { merge: true });
-        } catch (error) {
-            console.log("Error while setting message as seen: ", error);
-        }
-    }
 
     // This LOGIC works only for web
     // This is the Logic for resizing the textInput component
@@ -60,36 +39,35 @@ const ChatRoom = () => {
     }, [inputText]);
 
     const createRoomIfNotExists = async () => {
+        if (!item?.uid || !user?.uid) return;
         setIsLoading(true);
-        let roomId = CHAT_APP_CONSTANTS.getRoomId(user?.uid, item.uid);
-        const docRef = doc(db, CHAT_APP_CONSTANTS.ROOMS_COLLECTION, roomId);
-        const documentExists = await getDoc(docRef);
-        if (!documentExists.exists()) {
-            await setDoc(doc(db, CHAT_APP_CONSTANTS.ROOMS_COLLECTION, roomId), {
-                roomId,
-                createdAt: Timestamp.fromDate(new Date())
-            })
-        } else {
-            // This is where we are listening to the messages in the firebase
-            const messagesRef = messagesCollectionRef(docRef);
-            const q = query(messagesRef, orderBy('createdAt', 'asc'));
-            // The onSnapShot is the listener it listens to the messageCollectionRef
-            const unsub = onSnapshot(q, (snapshot) => {
-                let allMessages = snapshot.docs.map((message) => {
-                    const messageData = message.data();
-                    const userId = localStorage.getItem("userId");
-                    console.log("My userId: ", userId);
-                    console.log({ messageText: messageData.text, seenValue: !messageData.seen, mainValue: messageData.receiverId == userId });
-                    if (isChatRoomOpen && messageData.receiverId == userId) {
-                        console.log("Message data: ", message)
-                        markMessageAsSeen(messagesRef, message?.id);
-                    }
-                    return messageData;
+        try {
+            let roomId = CHAT_APP_CONSTANTS.getRoomId(user?.uid, item.uid);
+            const docRef = doc(db, CHAT_APP_CONSTANTS.ROOMS_COLLECTION, roomId);
+            const documentExists = await getDoc(docRef);
+            if (!documentExists.exists()) {
+                await setDoc(doc(db, CHAT_APP_CONSTANTS.ROOMS_COLLECTION, roomId), {
+                    roomId,
+                    createdAt: Timestamp.fromDate(new Date())
+                })
+            } else {
+                // This is where we are listening to the messages in the firebase
+                const messagesRef = messagesCollectionRef(docRef);
+                const q = query(messagesRef, orderBy('createdAt', 'asc'));
+                // The onSnapShot is the listener it listens to the messageCollectionRef
+                const unsub = onSnapshot(q, (snapshot) => {
+                    let allMessages = snapshot.docs.map((message) => {
+                        const messageData = message.data();
+                        return { id: message.id, ...messageData };
+                    });
+                    setMessages([...allMessages]);
                 });
-                setMessages([...allMessages]);
-            });
+                return unsub;
+            }
+        } catch (error) {
+            console.log("Error while creating chatroom/fetching messages: ", error);
+        }finally{
             setIsLoading(false);
-            return unsub;
         }
     }
 
@@ -149,7 +127,7 @@ const ChatRoom = () => {
                             <ScrollView
                                 ref={scrollViewRef}
                             >
-                                <MessageList user={user} messages={messages} />
+                                <MessageList user={user} item={item} messages={messages} />
                             </ScrollView>
                         </View>
 

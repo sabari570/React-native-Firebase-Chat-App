@@ -14,7 +14,7 @@ const HomeHeader = () => {
     const { top } = useSafeAreaInsets();
     const { user, logout } = useAuth();
     const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
-    const dropdownRef = useRef(null);
+    const dropdownRef = useRef<HTMLDivElement | null>(null);
 
     const toggleDropdown = (e: GestureResponderEvent) => setIsDropdownOpen(!isDropdownOpen);
     const closeDropdown = () => setIsDropdownOpen(false);
@@ -27,7 +27,7 @@ const HomeHeader = () => {
     useEffect(() => {
         if (typeof document !== "undefined") {
             const handleClickOutside = (event: MouseEvent) => {
-                if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                     closeDropdown();
                 }
             }

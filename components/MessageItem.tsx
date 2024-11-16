@@ -5,11 +5,11 @@ import { heightPercentageToDP } from 'react-native-responsive-screen'
 import { CHAT_APP_CONSTANTS } from '@/constants/constants'
 
 
-const CustomMessageRenderer = (isMe: boolean, messageText?: string, profilePicUrl?: string, messageIsSeen?: boolean) => {
+const CustomMessageRenderer = (isMe: boolean, messageText?: string, profilePicUrl?: string, messageIsSeen?: boolean, isMyLastMessage?: boolean) => {
     const screenWidth = Dimensions.get('window').width;
     return (
         <View className={`flex-row ${isMe ? "justify-end mr-2" : "justify-start ml-2"}`}>
-            <View className={`${!isMe ? "flex-row" : "flex-row-reverse"} justify-center items-end`}>
+            <View className={`relative p-1 ${!isMe ? "flex-row" : "flex-row-reverse"} justify-center items-end`}>
                 <Image
                     style={{
                         height: heightPercentageToDP(3.3),
@@ -34,21 +34,23 @@ const CustomMessageRenderer = (isMe: boolean, messageText?: string, profilePicUr
                         >
                             <Text className={`font-sans text-sm ${isMe ? "text-white" : "text-gray-800"}`}>
                                 {messageText}
-                                {isMe && (
-                                    <Text>{messageIsSeen ? 'Seen' : 'Delivered'}</Text>
-                                )}
                             </Text>
                         </View>
                     </View>
                 </View>
+                {isMe && isMyLastMessage && (
+                    <Text className={`font-sans text-xs text-gray-500 absolute right-12 bottom-[-1px]`}>
+                        {messageIsSeen ? 'Seen' : 'Delivered'}
+                    </Text>
+                )}
             </View>
         </View>
     )
 }
 
-const MessageItem: React.FC<MessageItemProps> = ({ message, currrentUser }) => {
+const MessageItem: React.FC<MessageItemProps> = ({ message, currrentUser, isMyLastMessage }) => {
     const isMe: boolean = currrentUser?.uid == message?.userId;
-    return CustomMessageRenderer(isMe, message?.text, message?.profileUrl, message?.seen);
+    return CustomMessageRenderer(isMe, message?.text, message?.profileUrl, message?.seen, isMyLastMessage);
 
 }
 
@@ -56,5 +58,6 @@ export default MessageItem
 
 interface MessageItemProps {
     message: any,
-    currrentUser: any
+    currrentUser: any,
+    isMyLastMessage: boolean,
 }
